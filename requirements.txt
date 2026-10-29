@@ -1,0 +1,24 @@
+# Tool to Markdown 核心依赖（Python 3.11）
+# 安装：python -m pip install -r requirements.txt
+# 以下版本为本机实测可用的下限，未锁死小版本。
+
+# PDF / Markdown / Word
+pdfplumber>=0.11
+PyMuPDF>=1.24
+beautifulsoup4>=4.12
+markdownify>=1.0
+python-docx>=1.1
+Pillow>=10.0
+
+# 控制台与看板
+psutil>=5.9
+rich>=13.0
+
+# 智能流水线（页图判定与图像统计）
+numpy>=1.26
+
+# ---------------------------------------------------------------------------
+# 可选 OCR（本包只提供 RapidOCR）：单独安装
+#   python -m pip install -r requirements-ocr.txt
+# 其他视觉模型不随包提供，也不需要安装。
+# ---------------------------------------------------------------------------

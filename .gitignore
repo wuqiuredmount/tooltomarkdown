@@ -1,0 +1,35 @@
+# 用户数据：书籍、Markdown 成果、图片、OCR 中间产物
+newfiles/*
+library/*
+outputs/*
+logs/*
+tmp/*
+!newfiles/*/
+!library/*/
+!outputs/*/
+!logs/*/
+!tmp/*/
+!**/.gitkeep
+
+# 模型与本地环境
+models/
+.venvs/
+ai_cache/
+tools/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# 编辑器与系统
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 敏感配置
+.env
+*.local.json

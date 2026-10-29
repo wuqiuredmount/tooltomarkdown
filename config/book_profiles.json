@@ -1,0 +1,227 @@
+{
+  "version": 1,
+  "_readme": [
+    "图书版式配置。新增一本书只要在这里加一个 profile（或用 auto 让程序自己猜），不改代码。",
+    "profile 字段说明：",
+    "  break        : 分页符正则（列表，按顺序尝试）",
+    "  marker       : 页标记正则。number_from=marker 表示页码从标记里取；number_from=body 表示从正文首尾行取。",
+    "                 number_belongs=previous 表示该页码属于「它前面那一页」（页脚型，如 · 12 · 出现在分页符之后）；",
+    "                 number_belongs=next 表示属于「它后面那一页」（页眉型，如 ## Page 12 / 300）。",
+    "  body_clean   : 从正文里剔除的残留（HTML 居中块、分页线等），(?P<inner>...) 可保留内部文字。",
+    "  number_line  : number_from=body 时，用这个正则去匹配页首/页尾的行来取页码。",
+    "  sections     : front/toc/body 的判定正则（按优先级）。",
+    "  build        : 由 JSON 重建 Markdown 时的模板。",
+    "  style_rebuild: 定点修改后回写 md 时，保留原有分页结构的尾部模板。"
+  ],
+  "active_profile": "auto",
+  "docx": {
+    "page": {
+      "width_cm": 18.5,
+      "height_cm": 26.0
+    },
+    "margins_cm": {
+      "top": 2.4,
+      "bottom": 2.4,
+      "left": 2.2,
+      "right": 2.0
+    },
+    "fonts": {
+      "body_cn": "宋体",
+      "head_cn": "黑体",
+      "latin": "Times New Roman",
+      "mono": "Consolas"
+    },
+    "sizes_pt": {
+      "body": 10.5,
+      "head1": 18.0,
+      "head2": 13.5,
+      "head3": 12.0,
+      "note": 9.0,
+      "pageno": 9.0,
+      "toc": 10.0
+    },
+    "colors": {
+      "pageno": "2E74B5",
+      "note": "333333"
+    },
+    "body": {
+      "indent_chars": 2,
+      "line_spacing": 1.5,
+      "space_after_pt": 0.0
+    },
+    "note_block": {
+      "rule_ratio": 0.62,
+      "hanging_indent_cm": 0.74,
+      "line_spacing": 1.15
+    },
+    "toc_list": {
+      "dot_leader": true,
+      "indent_cm": 0.4
+    },
+    "markdown": {
+      "_readme": "脚注行判定（逐条尝试）；OCR 书常见裸圈号行，故默认同时接受 `>` 与 ① 开头",
+      "footnote_line": [
+        "^>\\s?",
+        "^\\s*[①-⑳]\\s*\\S"
+      ],
+      "heading_heuristic": [
+        {
+          "_readme": "OCR 文本常把章节标题压成普通段落；长度阈值避免误判正文",
+          "pattern": "^第[一二三四五六七八九十百零〇0-9]+[章篇编]",
+          "level": 1,
+          "max_chars": 40
+        },
+        {
+          "pattern": "^第[一二三四五六七八九十百零〇0-9]+节",
+          "level": 2,
+          "max_chars": 40
+        },
+        {
+          "pattern": "^(序言|自序|前言|导论|绪论|结语|结论|后记|参考文献|附录|索引|致谢)[\\s　]*(.{0,20})$",
+          "level": 1,
+          "max_chars": 30
+        }
+      ]
+    },
+    "cover": {
+      "_readme": "md 的 `# 书名` 单独排成扉页",
+      "size_pt": 26,
+      "space_before_pt": 180
+    },
+    "images": {
+      "_readme": "内嵌图片压缩：超过 max_px 或 800KB 的图会转成 JPEG 再插入，避免单本 DOCX 几十 MB",
+      "max_px": 1200,
+      "jpeg_quality": 75,
+      "width_cm": 12
+    }
+  },
+  "profiles": {
+    "center-pageno": {
+      "desc": "HTML 居中页码 + --- 分页（人工精校稿）",
+      "break": [
+        "^\\s*-{2,}\\s*$"
+      ],
+      "marker": {
+        "pattern": "<p\\s+align=\"center\"\\s*>\\s*(?P<label>[^<]*\\d[^<]*?)\\s*</p>",
+        "number_pattern": "(\\d{1,4})",
+        "number_from": "marker",
+        "number_belongs": "previous"
+      },
+      "body_clean": [
+        "<p\\s+align=\"center\"\\s*>(?P<inner>[\\s\\S]*?)</p>"
+      ],
+      "sections": {
+        "toc": [
+          "目\\s*录",
+          "CONTENTS?",
+          "目\\s*次"
+        ],
+        "front": [
+          "^\\s*(代序|序言|自序|译者序|序|前言|出版说明|凡例|导言|引言|致谢|编者的话)"
+        ],
+        "body": [
+          "^\\s*第[一二三四五六七八九十百零〇0-9]+章",
+          "^\\s*Chapter\\s+\\d+"
+        ]
+      },
+      "build": {
+        "title": "# {title}\n\n",
+        "page": "{text}\n\n---\n\n<p align=\"center\">{label}</p>\n\n"
+      },
+      "label_fmt": "· {n} ·"
+    },
+    "formfeed": {
+      "desc": "换页符 \\f 分页，页码在页尾独立成行（· 12 · / - 12 - / 12）",
+      "break": [
+        "\\f",
+        "^\\s*-{3,}\\s*$"
+      ],
+      "marker": {
+        "pattern": null,
+        "number_from": "body",
+        "number_belongs": "previous"
+      },
+      "number_line": "^\\s*[·•・\\-—–\\s]{0,3}(?P<n>\\d{1,4})\\s*[·•・\\-—–\\s]{0,3}$",
+      "body_clean": [
+        "<p\\s+align=\"center\"\\s*>(?P<inner>[\\s\\S]*?)</p>"
+      ],
+      "sections": {
+        "toc": [
+          "目\\s*录",
+          "CONTENTS?",
+          "目\\s*次"
+        ],
+        "front": [
+          "^\\s*(代序|序言|自序|译者序|序|前言|出版说明|凡例|导言|引言|致谢)"
+        ],
+        "body": [
+          "^\\s*第[一二三四五六七八九十百零〇0-9]+章"
+        ]
+      },
+      "build": {
+        "title": "# {title}\n\n",
+        "page": "{text}\n\n<p align=\"center\">{label}</p>\n\n---\n\n"
+      }
+    },
+    "page-heading": {
+      "desc": "扫描书管线：## Page N / total 作为页眉，无独立页码行",
+      "break": [],
+      "marker": {
+        "pattern": "^##\\s*Page\\s+(?P<n>\\d+)\\s*/\\s*(?P<total>\\d+)\\s*$",
+        "number_from": "marker",
+        "number_belongs": "next",
+        "number_pattern": "(\\d{1,4})"
+      },
+      "body_clean": [],
+      "sections": {
+        "toc": [
+          "目\\s*录",
+          "CONTENTS?",
+          "目\\s*次"
+        ],
+        "front": [
+          "^\\s*(代序|序言|自序|译者序|序|前言|出版说明|凡例|导言|引言)"
+        ],
+        "body": [
+          "^\\s*第[一二三四五六七八九十百零〇0-9]+章"
+        ]
+      },
+      "build": {
+        "title": "# {title}\n\n",
+        "page": "## Page {n} / {total}\n\n{text}\n\n---\n\n"
+      },
+      "label_fmt": "· {n} ·"
+    },
+    "bare": {
+      "desc": "最保守：只有 --- 分页，无页码（页码留空，不猜）",
+      "break": [
+        "^\\s*-{2,}\\s*$"
+      ],
+      "marker": {
+        "pattern": null,
+        "number_from": "none",
+        "number_belongs": "previous"
+      },
+      "body_clean": [
+        "<p\\s+align=\"center\"\\s*>(?P<inner>[\\s\\S]*?)</p>"
+      ],
+      "sections": {
+        "toc": [
+          "目\\s*录",
+          "CONTENTS?",
+          "目\\s*次"
+        ],
+        "front": [
+          "^\\s*(代序|序言|自序|译者序|序|前言|出版说明|凡例|导言|引言)"
+        ],
+        "body": [
+          "^\\s*第[一二三四五六七八九十百零〇0-9]+章"
+        ]
+      },
+      "build": {
+        "title": "# {title}\n\n",
+        "page": "{text}\n\n---\n\n"
+      }
+    }
+  }
+}

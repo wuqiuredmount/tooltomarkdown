@@ -1,0 +1,7 @@
+# Tool to Markdown OCR（只提供轨道一 RapidOCR）
+# 安装：python -m pip install -r requirements-ocr.txt
+# 识别模型由 rapidocr-openvino 自带（约 16 MB），装完即可用，无需另下。
+# 其他视觉模型不随包提供，也不需要安装。
+
+rapidocr-openvino>=1.4
+openvino>=2024.0,<2025
